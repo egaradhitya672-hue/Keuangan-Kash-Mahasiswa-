@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a5140" />
+  <title>SiKas — Keuangan Lebih Teratur</title>
+  <style>
+    :root {
+      --navy: #1a5140;
+      --navy-light: #288760;
+      --blue: #288760;
+      --blue-hover: #1a5140;
+      --accent: #5ca67c;
+      --soft: #b7e5ba;
+      --blue-soft: #e8f6e9;
+      --ink: #17352c;
+      --muted: #7f948b;
+      --line: #e6f0e8;
+      --bg: #f4faf5;
+      --green: #288760;
+      --red: #e75b68;
+      --shadow: 0 15px 45px rgba(26, 81, 64, .10);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
+    .login-screen { min-height: 100vh; display: grid; grid-template-columns: 1.05fr .95fr; background: var(--navy); }
+    .login-art { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 48px clamp(28px, 7vw, 100px); color: white; background: radial-gradient(circle at 76% 35%, rgba(92,166,124,.55) 0, transparent 34%), linear-gradient(145deg, rgba(26,81,64,.88), rgba(40,135,96,.76)), var(--login-photo, url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1600&q=85')) center/cover; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -.4px; }
+    .brand-icon { width: 39px; height: 39px; display: grid; place-items: center; color: var(--navy); background: var(--soft); border-radius: 13px; font-size: 20px; }
+    .art-content { max-width: 520px; position: relative; z-index: 1; }
+    .art-content h1 { font-size: clamp(36px, 5vw, 62px); line-height: 1.08; letter-spacing: -2px; margin: 0 0 20px; }
+    .art-content h1 span { color: var(--soft); }
+    .art-content p { max-width: 440px; color: #d5efd7; font-size: 16px; line-height: 1.8; }
+    .art-footer { color: #b7e5ba; font-size: 12px; opacity: .8; }
+    .floating-card { position: absolute; right: 10%; top: 23%; width: 220px; padding: 22px; border: 1px solid rgba(255,255,255,.18); border-radius: 20px; background: rgba(255,255,255,.1); backdrop-filter: blur(12px); transform: rotate(7deg); box-shadow: 0 25px 50px rgba(0,0,0,.16); }
+    .floating-card small { color: #d5efd7; }
+    .floating-card strong { display: block; margin-top: 12px; font-size: 25px; }
+    .floating-bars { display: flex; gap: 7px; align-items: end; height: 53px; margin-top: 15px; }
+    .floating-bars i { display: block; flex: 1; background: linear-gradient(var(--soft), var(--accent)); border-radius: 5px 5px 2px 2px; }
+    .login-panel { display: grid; place-items: center; padding: 35px; background: #fff; }
+    .login-box { width: min(100%, 390px); }
+    .login-box .brand { color: var(--navy); margin-bottom: 48px; }
+    .login-box .brand-icon { background: var(--blue); color: #fff; }
+    .login-box h2 { margin: 0 0 8px; font-size: 30px; letter-spacing: -.8px; }
+    .login-box > p { margin: 0 0 30px; color: var(--muted); font-size: 14px; }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; }
+    .input-wrap { position: relative; }
+    .field input, .field select { width: 100%; border: 1px solid #dbe8de; border-radius: 11px; padding: 13px 14px; outline: none; color: var(--ink); background: white; transition: .2s; }
+    .field input:focus, .field select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(40,135,96,.15); }
+    .password-toggle { position: absolute; top: 50%; right: 13px; transform: translateY(-50%); border: 0; background: none; color: var(--muted); font-size: 12px; }
+    .primary-btn { width: 100%; border: 0; padding: 14px; color: #fff; background: var(--blue); border-radius: 11px; font-weight: 750; box-shadow: 0 8px 18px rgba(40,135,96,.25); transition: .2s; }
+    .primary-btn:hover { background: var(--blue-hover); transform: translateY(-1px); }
+    .login-error { min-height: 18px; color: var(--red); font-size: 12px; margin: 10px 0 0; }
+    .background-upload { display: inline-block; margin-top: 12px; padding: 9px 12px; border: 1px solid rgba(255,255,255,.35); border-radius: 9px; color: #d5efd7; background: rgba(255,255,255,.1); font-size: 12px; font-weight: 700; cursor: pointer; }
+    .background-upload:hover { background: rgba(255,255,255,.18); }
+    .background-upload-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+    .background-upload-input:focus-visible + .background-upload { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 2px; }
+    .app { min-height: 100vh; display: flex; }
+    .sidebar { position: fixed; inset: 0 auto 0 0; width: 248px; padding: 27px 18px; color: white; background: var(--navy); display: flex; flex-direction: column; z-index: 5; }
+    .sidebar .brand { padding: 0 10px; margin-bottom: 48px; }
+    .nav-label { padding: 0 12px; color: #8fc7a6; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 12px; }
+    .nav-item { display: flex; align-items: center; gap: 13px; width: 100%; padding: 12px; margin: 3px 0; border: 0; border-radius: 10px; color: #b7e5ba; background: transparent; font-size: 13px; font-weight: 650; text-decoration: none; text-align: left; }
+    .nav-item.active { color: white; background: var(--navy-light); }
+    .nav-item .nav-icon { width: 20px; text-align: center; font-size: 17px; }
+    .sidebar-bottom { margin-top: auto; padding: 16px 11px 0; border-top: 1px solid rgba(255,255,255,.12); }
+    .profile { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; display: grid; place-items: center; color: var(--navy); background: var(--soft); border-radius: 50%; font-weight: 800; }
+    .profile-info { flex: 1; min-width: 0; }
+    .profile-info strong { display: block; font-size: 12px; }
+    .profile-info small { color: #9fd3b2; font-size: 10px; }
+    .logout { border: 0; color: #b7e5ba; background: transparent; font-size: 17px; }
+    .main { width: calc(100% - 248px); margin-left: 248px; padding: 34px clamp(22px, 4vw, 56px) 50px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 31px; }
+    .topbar h1 { margin: 0 0 5px; font-size: 25px; letter-spacing: -.7px; }
+    .topbar p { margin: 0; color: var(--muted); font-size: 13px; }
+    .date-chip { padding: 10px 13px; color: #5d7568; background: white; border: 1px solid var(--line); border-radius: 10px; font-size: 12px; }
+    .welcome-card { position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: center; margin-bottom: 23px; padding: 25px 30px; border-radius: 17px; color: white; background: linear-gradient(105deg, #1a5140, #288760 55%, #5ca67c); box-shadow: 0 13px 25px rgba(40,135,96,.2); }
+    .welcome-card::after { content: ""; position: absolute; width: 250px; height: 250px; right: 13%; top: -160px; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; box-shadow: 0 0 0 35px rgba(255,255,255,.04), 0 0 0 70px rgba(255,255,255,.035); }
+    .welcome-card small { color: var(--soft); }
+    .welcome-card h2 { margin: 7px 0; font-size: 21px; }
+    .welcome-card p { margin: 0; color: #e3f5e5; font-size: 12px; }
+    .welcome-emoji { position: relative; z-index: 1; font-size: 48px; padding-right: 20px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 23px; }
+    .summary-card { padding: 19px 20px; background: white; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 4px 15px rgba(26,81,64,.04); }
+    .summary-head { display: flex; align-items: center; justify-content: space-between; color: #71857b; font-size: 12px; }
+    .summary-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; font-size: 16px; }
+    .icon-blue { background: var(--blue-soft); color: var(--blue); }
+    .icon-green { background: var(--soft); color: var(--navy); }
+    .icon-red { background: #fff0f0; color: #e75b68; }
+    .summary-card h3 { margin: 13px 0 4px; font-size: 23px; letter-spacing: -.6px; }
+    .summary-card small { color: #9aaca2; font-size: 10px; }
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(250px, .85fr); gap: 18px; align-items: start; }
+    .trend-panel { margin-bottom: 18px; }
+    .trend-legend { display: flex; gap: 15px; color: #71857b; font-size: 11px; }
+    .trend-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+    .legend-dot.expense { background: var(--red); }
+    .trend-chart { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; height: 190px; padding: 12px 4px 0; border-bottom: 1px solid var(--line); }
+    .trend-month { display: flex; flex-direction: column; align-items: center; justify-content: end; min-width: 0; }
+    .trend-bars { display: flex; align-items: end; justify-content: center; gap: 6px; width: 100%; height: 145px; border-bottom: 1px dashed #e6f0e8; }
+    .trend-bar { width: min(26px, 35%); min-height: 2px; border-radius: 5px 5px 0 0; background: var(--blue); }
+    .trend-bar.expense { background: var(--red); }
+    .trend-month-label { padding: 9px 0 10px; color: #71857b; font-size: 10px; }
+    .panel { padding: 21px; background: white; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 4px 15px rgba(26,81,64,.04); }
+    .panel-heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 19px; }
+    .panel-heading h3 { margin: 0; font-size: 15px; }
+    .panel-heading p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .small-select { padding: 8px 9px; border: 1px solid var(--line); border-radius: 8px; background: white; color: #62786d; font-size: 11px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+    th { padding: 10px 8px; text-align: left; color: #98aca1; font-size: 10px; font-weight: 700; border-bottom: 1px solid var(--line); }
+    td { padding: 13px 8px; border-bottom: 1px solid #eef5ef; font-size: 11px; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .transaction-name { font-weight: 700; color: #26453a; }
+    .transaction-category { display: block; margin-top: 4px; color: #93a79c; font-size: 10px; }
+    .amount-in { color: var(--green); font-weight: 750; }
+    .amount-out { color: var(--red); font-weight: 750; }
+    .type-pill { padding: 5px 8px; border-radius: 20px; background: var(--soft); color: var(--navy); font-size: 9px; }
+    .type-pill.out { background: #fff0f0; color: var(--red); }
+    .empty-row { text-align: center; padding: 30px; color: var(--muted); }
+    .quick-form .field { margin-bottom: 13px; }
+    .quick-form .field label { margin-bottom: 6px; font-size: 11px; }
+    .quick-form .field input, .quick-form .field select { padding: 10px 11px; font-size: 12px; border-radius: 9px; }
+    .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 14px; }
+    .type-toggle button { padding: 9px; border: 1px solid #dbe8de; border-radius: 9px; color: #75897f; background: white; font-size: 11px; }
+    .type-toggle button.selected.income { color: var(--navy); background: var(--soft); border-color: var(--accent); }
+    .type-toggle button.selected.expense { color: var(--red); background: #fff4f3; border-color: #ffc3c2; }
+    .quick-form .primary-btn { padding: 11px; font-size: 12px; }
+    .budget-note { padding: 13px; margin-top: 14px; border-radius: 10px; color: #3f6657; background: var(--blue-soft); font-size: 10px; line-height: 1.7; }
+    .toast { position: fixed; right: 24px; bottom: 24px; padding: 12px 17px; border-radius: 10px; color: white; background: var(--navy); box-shadow: var(--shadow); font-size: 12px; z-index: 20; animation: fade .25s ease; }
+    @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) {
+      .login-screen { grid-template-columns: .85fr 1fr; }
+      .floating-card { right: 5%; top: 18%; transform: scale(.8) rotate(7deg); transform-origin: top right; }
+      .sidebar { width: 210px; }
+      .main { width: calc(100% - 210px); margin-left: 210px; padding-left: 24px; padding-right: 24px; }
+      .content-grid { grid-template-columns: 1fr; }
+      .trend-chart { gap: 5px; height: 170px; }
+      .trend-bars { height: 125px; }
+    }
+    @media (max-width: 650px) {
+      .login-screen { display: block; background: #fff; }
+      .login-art { min-height: 210px; padding: 23px 25px; }
+      .login-art .brand { margin-bottom: 23px; }
+      .art-content h1 { font-size: 31px; letter-spacing: -1px; margin-bottom: 8px; }
+      .art-content p { font-size: 12px; line-height: 1.5; max-width: 300px; margin: 0; }
+      .art-footer, .floating-card { display: none; }
+      .login-panel { padding: 30px 25px; align-items: start; }
+      .login-box .brand { display: none; }
+      .login-box h2 { font-size: 26px; }
+      .app { display: block; }
+      .sidebar { width: 100%; height: 65px; inset: auto 0 0; padding: 0 8px; flex-direction: row; justify-content: center; }
+      .sidebar .brand, .nav-label, .sidebar-bottom { display: none; }
+      .sidebar nav { display: flex; width: 100%; justify-content: space-around; align-items: center; }
+      .nav-item { flex: 1; flex-direction: column; justify-content: center; align-items: center; gap: 3px; margin: 0; padding: 7px 2px; font-size: 9px; text-align: center; }
+      .nav-item .nav-icon { font-size: 17px; }
+      .main { width: 100%; margin: 0; padding: 23px 16px 90px; }
+      .topbar { margin-bottom: 21px; }
+      .topbar h1 { font-size: 21px; }
+      .date-chip { font-size: 10px; padding: 8px; }
+      .welcome-card { padding: 20px; }
+      .welcome-card h2 { font-size: 17px; }
+      .welcome-emoji { font-size: 36px; padding-right: 3px; }
+      .summary-grid { gap: 9px; }
+      .summary-card { padding: 13px 11px; }
+      .summary-head { font-size: 9px; }
+      .summary-icon { width: 27px; height: 27px; font-size: 13px; }
+      .summary-card h3 { font-size: 15px; margin-top: 11px; }
+      .summary-card small { font-size: 8px; }
+      .panel { padding: 16px 13px; }
+    }
+  </style>
+</head>
+<body>
+  <section class="login-screen" id="loginScreen">
+    <div class="login-art">
+      <div class="brand"><span class="brand-icon">✦</span><span>SiKas</span></div>
+      <div class="floating-card" aria-hidden="true"><small>Saldo bulan ini</small><strong>Rp1.250.000</strong><div class="floating-bars"><i style="height:35%"></i><i style="height:55%"></i><i style="height:43%"></i><i style="height:78%"></i><i style="height:62%"></i><i style="height:95%"></i></div></div>
+      <div class="art-content"><h1>Pencatatan,<br /><span>Keuangan.</span></h1><p>Catat pemasukan dan pengeluaran harianmu. Ambil kendali atas keuangan, satu transaksi dalam satu waktu.</p><input class="background-upload-input" id="backgroundUpload" type="file" accept="image/*" aria-label="Pilih foto latar"><label class="background-upload" for="backgroundUpload">Unggah foto latar</label></div>
+      <div class="art-footer">Teman cerdas untuk mengatur keuangan · 2025</div>
+    </div>
+    <div class="login-panel">
+      <form class="login-box" id="loginForm">
+        <div class="brand"><span class="brand-icon">✦</span><span>SiKas</span></div>
+        <h2>Selamat datang 👋</h2>
+        <p>Masuk untuk melihat ringkasan keuanganmu.</p>
+        <div class="field"><label for="username">Username</label><input id="username" name="username" autocomplete="username" placeholder="Masukkan username" required /></div>
+        <div class="field"><label for="password">Password</label><div class="input-wrap"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Masukkan password" required /><button class="password-toggle" id="togglePassword" type="button">Lihat</button></div></div>
+        <button class="primary-btn" type="submit">Masuk ke akun <span aria-hidden="true">→</span></button>
+        <p class="login-error" id="loginError" role="alert"></p>
+      </form>
+    </div>
+  </section>
+  <div class="app hidden" id="appScreen">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-icon">✦</span><span>SiKas</span></div>
+      <div class="nav-label">Menu utama</div>
+      <nav aria-label="Navigasi utama">
+        <a class="nav-item active" href="#dashboard"><span class="nav-icon">▦</span>Dashboard</a>
+        <a class="nav-item" href="#transactions"><span class="nav-icon">↕</span>Transaksi</a>
+        <button class="nav-item" id="navLogout" type="button"><span class="nav-icon">×</span>Logout</button>
+      </nav>
+      <div class="sidebar-bottom"><div class="profile"><div class="avatar">S</div><div class="profile-info"><strong>Sobat SiKas</strong><small>Akun publik</small></div><button class="logout" id="logoutButton" aria-label="Keluar" title="Keluar">↪</button></div></div>
+    </aside>
+    <main class="main" id="dashboard">
+      <header class="topbar"><div><h1>Beranda</h1><p>Ringkasan keuanganmu, tetap terkendali.</p></div><div class="date-chip" id="todayLabel"></div></header>
+      <section class="welcome-card"><div><small>HALO, SOBAT SIKAS! 👋</small><h2>Yuk, simpan keuanganmu.</h2><p>Kebiasaan kecil hari ini, dampak besar nanti.</p></div><div class="welcome-emoji" aria-hidden="true">💸</div></section>
+      <section class="summary-grid" aria-label="Ringkasan keuangan">
+        <article class="summary-card"><div class="summary-head">Total saldo <span class="summary-icon icon-blue">▣</span></div><h3 id="balanceTotal">Rp0</h3><small>Sisa pemasukan setelah pengeluaran</small></article>
+        <article class="summary-card"><div class="summary-head">Pemasukan <span class="summary-icon icon-green">↙</span></div><h3 id="incomeTotal">Rp0</h3><small>Total seluruh pemasukan tercatat</small></article>
+        <article class="summary-card"><div class="summary-head">Pengeluaran <span class="summary-icon icon-red">↗</span></div><h3 id="expenseTotal">Rp0</h3><small>Total seluruh pengeluaran tercatat</small></article>
+      </section>
+      <section class="panel trend-panel" aria-labelledby="trendTitle">
+        <div class="panel-heading"><div><h3 id="trendTitle">Tren harian</h3><p>Perbandingan pemasukan dan pengeluaran 7 hari terakhir</p></div><div class="trend-legend" aria-label="Keterangan grafik"><span><i class="legend-dot"></i>Masuk</span><span><i class="legend-dot expense"></i>Keluar</span></div></div>
+        <div class="trend-chart" id="trendChart" role="img" aria-label="Grafik tren pemasukan dan pengeluaran"></div>
+      </section>
+      <div class="content-grid">
+        <section class="panel" id="transactions">
+          <div class="panel-heading"><div><h3>Transaksi terbaru</h3><p>Semua catatan keuanganmu</p></div><select id="filterType" class="small-select" aria-label="Filter transaksi"><option value="all">Semua transaksi</option><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select></div>
+          <div class="table-wrap"><table><thead><tr><th>TRANSAKSI</th><th>TANGGAL</th><th>JENIS</th><th>NOMINAL</th></tr></thead><tbody id="transactionList"></tbody></table></div>
+        </section>
+        <section class="panel" id="quickAdd">
+          <div class="panel-heading"><div><h3>Tambah transaksi</h3><p>Jangan lupa catat, ya!</p></div><span class="summary-icon icon-blue">＋</span></div>
+          <form class="quick-form" id="transactionForm">
+            <div class="type-toggle"><button type="button" class="selected income" data-type="income">＋ Pemasukan</button><button type="button" class="expense" data-type="expense">− Pengeluaran</button></div>
+            <div class="field"><label for="transactionName">Nama transaksi</label><input id="transactionName" placeholder="-" maxlength="50" required /></div>
+            <div class="field"><label for="transactionCategory">Kategori</label><select id="transactionCategory"><option>Uang Saku</option><option>Beasiswa</option><option>Freelance</option><option>Hadiah</option><option>Lainnya</option></select></div>
+            <div class="field"><label for="transactionAmount">Nominal (Rp)</label><input id="transactionAmount" type="number" min="1" step="1" placeholder="-" required /></div>
+            <button class="primary-btn" type="submit">Simpan transaksi</button>
+          </form>
+          <div class="budget-note">💡 <strong>Tips:</strong> Catat transaksi segera setelah terjadi agar anggaran bulananmu tetap akurat.</div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div class="toast hidden" id="toast" role="status"></div>
+  <script>
+    (() => {
+      const loginScreen = document.getElementById('loginScreen');
+      const appScreen = document.getElementById('appScreen');
+      const loginForm = document.getElementById('loginForm');
+      const loginError = document.getElementById('loginError');
+      const backgroundUpload = document.getElementById('backgroundUpload');
+      const list = document.getElementById('transactionList');
+      const filter = document.getElementById('filterType');
+      const transactionForm = document.getElementById('transactionForm');
+      const toast = document.getElementById('toast');
+      const money = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+      const STORE_KEY = 'sikasTransactions';
+      const LOGIN_KEY = 'sikasLoggedIn';
+      const BACKGROUND_KEY = 'sikasLoginBackground';
+      let selectedType = 'income';
+      let toastTimer;
+      const categoryOptions = {
+        income: ['Uang Saku', 'Beasiswa', 'Freelance', 'Hadiah', 'Lainnya'],
+        expense: ['Kuliah', 'Hiburan', 'Kebutuhan Kelas', 'Lainnya']
+      };
+      function updateCategoryOptions(type) {
+        document.getElementById('transactionCategory').innerHTML = categoryOptions[type]
+          .map(category => `<option>${escapeHtml(category)}</option>`).join('');
+      }
+      function loadTransactions() {
+        try { return JSON.parse(localStorage.getItem(STORE_KEY) || localStorage.getItem('cashMahasiswaTransactions') || '[]'); }
+        catch { return []; }
+      }
+      let transactions = loadTransactions();
+      function saveTransactions() {
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(transactions)); }
+        catch { showToast('Penyimpanan browser tidak tersedia.'); }
+      }
+      function isLoggedInStored() {
+        try { return sessionStorage.getItem(LOGIN_KEY) === 'true'; } catch { return false; }
+      }
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.add('hidden'), 2600);
+      }
+      function applyLoginBackground(imageData) {
+        loginScreen.style.setProperty('--login-photo', `url("${imageData}")`);
+      }
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+      }
+      function renderTrend() {
+        const today = new Date();
+        const days = Array.from({ length: 7 }, (_, index) => {
+          const day = new Date(today);
+          day.setHours(0, 0, 0, 0);
+          day.setDate(today.getDate() - 6 + index);
+          return day;
+        });
+        const totals = days.map(day => {
+          const key = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+          return transactions.reduce((total, item) => {
+            if (item.date !== key) return total;
+            if (item.type === 'income') total.income += item.amount;
+            if (item.type === 'expense') total.expense += item.amount;
+            return total;
+          }, { income: 0, expense: 0 });
+        });
+        const max = Math.max(1, ...totals.flatMap(total => [total.income, total.expense]));
+        document.getElementById('trendChart').innerHTML = days.map((day, index) => {
+          const total = totals[index];
+          const weekday = new Intl.DateTimeFormat('id-ID', { weekday: 'short' }).format(day);
+          const label = `${weekday} ${day.getDate()}`;
+          const incomeHeight = total.income ? Math.max(2, total.income / max * 100) : 0;
+          const expenseHeight = total.expense ? Math.max(2, total.expense / max * 100) : 0;
+          return `<div class="trend-month"><div class="trend-bars"><i class="trend-bar" style="height:${incomeHeight}%" title="Masuk ${money.format(total.income)}"></i><i class="trend-bar expense" style="height:${expenseHeight}%" title="Keluar ${money.format(total.expense)}"></i></div><span class="trend-month-label">${label}</span></div>`;
+        }).join('');
+      }
+      function render() {
+        const income = transactions.filter(i => i.type === 'income').reduce((s, i) => s + i.amount, 0);
+        const expense = transactions.filter(i => i.type === 'expense').reduce((s, i) => s + i.amount, 0);
+        document.getElementById('balanceTotal').textContent = money.format(income - expense);
+        document.getElementById('incomeTotal').textContent = money.format(income);
+        document.getElementById('expenseTotal').textContent = money.format(expense);
+        renderTrend();
+        const shown = transactions.filter(i => filter.value === 'all' || i.type === filter.value).slice().reverse();
+        if (!shown.length) {
+          list.innerHTML = '<tr><td class="empty-row" colspan="4">Belum ada transaksi. Tambahkan catatan pertamamu ✨</td></tr>';
+          return;
+        }
+        list.innerHTML = shown.map(item => {
+          const isIncome = item.type === 'income';
+          const date = new Date(item.date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+          return `<tr><td><span class="transaction-name">${escapeHtml(item.name)}</span><span class="transaction-category">${escapeHtml(item.category)}</span></td><td>${date}</td><td><span class="type-pill ${isIncome ? '' : 'out'}">${isIncome ? 'Masuk' : 'Keluar'}</span></td><td class="${isIncome ? 'amount-in' : 'amount-out'}">${isIncome ? '+' : '−'}${money.format(item.amount)}</td></tr>`;
+        }).join('');
+      }
+      function setLoggedIn(isLoggedIn) {
+        loginScreen.classList.toggle('hidden', isLoggedIn);
+        appScreen.classList.toggle('hidden', !isLoggedIn);
+        if (isLoggedIn) render();
+      }
+      function logout() {
+        try { sessionStorage.removeItem(LOGIN_KEY); } catch {}
+        setLoggedIn(false);
+      }
+      loginForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const username = document.getElementById('username').value.replace(/\s+/g, '').toLowerCase();
+        const password = document.getElementById('password').value.trim();
+        if (username === 'sobatsikas' && password === 'UMPR2026') {
+          try { sessionStorage.setItem(LOGIN_KEY, 'true'); } catch {}
+          loginError.textContent = '';
+          setLoggedIn(true);
+        } else {
+          loginError.textContent = 'Username atau password belum tepat.';
+        }
+      });
+      backgroundUpload.addEventListener('change', () => {
+        const file = backgroundUpload.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+          loginError.textContent = 'Pilih file gambar untuk latar.';
+          return;
+        }
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+          if (typeof reader.result !== 'string') return;
+          applyLoginBackground(reader.result);
+          try { localStorage.setItem(BACKGROUND_KEY, reader.result); } catch {}
+          loginError.textContent = '';
+        });
+        reader.readAsDataURL(file);
+      });
+      try {
+        const savedBackground = localStorage.getItem(BACKGROUND_KEY);
+        if (savedBackground) applyLoginBackground(savedBackground);
+      } catch {}
+      document.getElementById('togglePassword').addEventListener('click', event => {
+        const input = document.getElementById('password');
+        const visible = input.type === 'password';
+        input.type = visible ? 'text' : 'password';
+        event.currentTarget.textContent = visible ? 'Sembunyi' : 'Lihat';
+      });
+      document.getElementById('logoutButton').addEventListener('click', logout);
+      document.getElementById('navLogout').addEventListener('click', logout);
+      document.querySelectorAll('.type-toggle button').forEach(button => button.addEventListener('click', () => {
+        selectedType = button.dataset.type;
+        document.querySelectorAll('.type-toggle button').forEach(item => item.classList.remove('selected'));
+        button.classList.add('selected');
+        updateCategoryOptions(selectedType);
+      }));
+      transactionForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const amount = Number(document.getElementById('transactionAmount').value);
+        const name = document.getElementById('transactionName').value.trim();
+        if (!name || !Number.isFinite(amount) || amount <= 0) return;
+        transactions.push({ id: Date.now(), name, category: document.getElementById('transactionCategory').value, amount, type: selectedType, date: new Date().toISOString().slice(0, 10) });
+        saveTransactions();
+        render();
+        transactionForm.reset();
+        updateCategoryOptions(selectedType);
+        showToast('Transaksi berhasil disimpan ✨');
+      });
+      filter.addEventListener('change', render);
+      document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      document.querySelectorAll('a.nav-item').forEach(link => link.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        link.classList.add('active');
+      }));
+      if (isLoggedInStored()) setLoggedIn(true);
+      else render();
+    })();
+  </script>
+</body>
+</html>
